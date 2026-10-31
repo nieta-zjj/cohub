@@ -38,8 +38,8 @@ final class WorkspaceSchemeHandler: NSObject, WKURLSchemeHandler {
         let headers = task.request.allHTTPHeaderFields ?? [:]
         let target = (task.request.httpMethod ?? "GET") == "GET" ? WorkspaceFiles.target(of: url) : nil
         let (files, origin) = (self.files, self.origin)
-        let reader = Task.detached { [weak self] in
-            let emit: @Sendable (Event) async -> Void = { event in await self?.deliver(event, to: id) }
+        let emit: @Sendable (Event) async -> Void = { [weak self] event in await self?.deliver(event, to: id) }
+        let reader = Task.detached {
             guard let target else { return await Self.end(404, origin: origin, emit: emit) }
             await Self.stream(files: files, target: target, headers: headers, origin: origin, emit: emit)
         }
